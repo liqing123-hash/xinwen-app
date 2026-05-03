@@ -75,6 +75,21 @@ app.post('/api/crawl', async (req, res) => {
   }
 });
 
+// API: 测试发送邮件 (用最近一天的数据)
+app.post('/api/test-mail', async (req, res) => {
+  try {
+    const catalogue = JSON.parse(fs.readFileSync(CATALOGUE_PATH, 'utf-8'));
+    if (!catalogue.length) return res.json({ success: false, message: '无新闻数据，请先抓取' });
+    const latest = catalogue[0];
+    const newsPath = path.join(NEWS_DIR, `${latest.date}.json`);
+    const data = JSON.parse(fs.readFileSync(newsPath, 'utf-8'));
+    await sendNewsMail(data.date, data.abstract, data.articles);
+    res.json({ success: true, message: `测试邮件已发送 (${latest.date})` });
+  } catch (e) {
+    res.json({ success: false, message: e.message });
+  }
+});
+
 async function sendPushToAll(title, body, url) {
   if (!VAPID_PUBLIC || !VAPID_PRIVATE) {
     console.log('[Push] VAPID 未配置，跳过推送');

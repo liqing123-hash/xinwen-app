@@ -9,11 +9,13 @@ function init() {
     console.log('[Mail] 邮箱未配置，跳过邮件发送');
     return false;
   }
+  const port = Number(SMTP_PORT) || 465;
   transporter = nodemailer.createTransport({
     host: SMTP_HOST,
-    port: Number(SMTP_PORT) || 465,
-    secure: (Number(SMTP_PORT) || 465) === 465,
+    port,
+    secure: port === 465,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
+    tls: { rejectUnauthorized: false },
   });
   console.log('[Mail] 邮件服务已配置');
   return true;

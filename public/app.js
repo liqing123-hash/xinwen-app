@@ -139,6 +139,28 @@ function setupCrawl() {
   };
 }
 
+// ===== 测试邮件 =====
+function setupTestMail() {
+  const btn = $('btn-test-mail');
+  if (!btn) return;
+  btn.onclick = async () => {
+    btn.textContent = '发送中...'; btn.disabled = true;
+    showStatus('正在发送测试邮件...');
+    try {
+      const res = await fetch('/api/test-mail', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showStatus(data.message, 'success');
+      } else {
+        showStatus(data.message || '发送失败', 'error');
+      }
+    } catch(e) {
+      showStatus('发送失败: ' + e.message, 'error');
+    }
+    btn.textContent = '测试邮件'; btn.disabled = false;
+  };
+}
+
 // ===== 初始化 =====
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
@@ -149,4 +171,5 @@ if (isDetail) {
   loadList();
   setupPush();
   setupCrawl();
+  setupTestMail();
 }
