@@ -50,15 +50,12 @@ export async function sendNewsMail(dateStr, abstract, articles) {
   </div>
 </div>`;
 
-  try {
-    await transporter.sendMail({
-      from: `"新闻联播" <${process.env.SMTP_USER}>`,
-      to: process.env.MAIL_TO,
-      subject: `📺 新闻联播 ${d} (${articles.length}条)`,
-      html,
-    });
-    console.log(`[Mail] ✅ 邮件已发送至 ${process.env.MAIL_TO}`);
-  } catch (e) {
-    console.error(`[Mail] ❌ 发送失败: ${e.message}`);
-  }
+  console.log(`[Mail] 正在发送至 ${process.env.MAIL_TO} (SMTP: ${process.env.SMTP_HOST}:${process.env.SMTP_PORT}, 用户: ${process.env.SMTP_USER})`);
+  await transporter.sendMail({
+    from: `"新闻联播" <${process.env.SMTP_USER}>`,
+    to: process.env.MAIL_TO,
+    subject: `📺 新闻联播 ${d} (${articles.length}条)`,
+    html,
+  });
+  console.log(`[Mail] ✅ 邮件已发送至 ${process.env.MAIL_TO}`);
 }
