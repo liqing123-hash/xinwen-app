@@ -124,8 +124,8 @@ cron.schedule('0 20 * * *', async () => {
   if (result) {
     const summary = result.abstract.replace(/\n/g, ' ').substring(0, 120) + '...';
     const d = `${dateStr.slice(0,4)}-${dateStr.slice(4,6)}-${dateStr.slice(6)}`;
-    await sendPushToAll(`新闻联播 ${d}`, summary, `/detail.html?date=${dateStr}`);
-    await sendNewsMail(dateStr, result.abstract, result.articles);
+    try { await sendPushToAll(`新闻联播 ${d}`, summary, `/detail.html?date=${dateStr}`); } catch(e) { console.error('[Cron] Web Push 失败:', e.message); }
+    try { await sendNewsMail(dateStr, result.abstract, result.articles); } catch(e) { console.error('[Cron] 微信推送失败:', e.message); }
   } else {
     console.log('[Cron] 无新内容, 30分钟后重试...');
     setTimeout(async () => {
@@ -133,8 +133,8 @@ cron.schedule('0 20 * * *', async () => {
       if (r) {
         const s = r.abstract.replace(/\n/g, ' ').substring(0, 120) + '...';
         const d = `${dateStr.slice(0,4)}-${dateStr.slice(4,6)}-${dateStr.slice(6)}`;
-        await sendPushToAll(`新闻联播 ${d}`, s, `/detail.html?date=${dateStr}`);
-        await sendNewsMail(dateStr, r.abstract, r.articles);
+        try { await sendPushToAll(`新闻联播 ${d}`, s, `/detail.html?date=${dateStr}`); } catch(e) { console.error('[Cron] Web Push 失败:', e.message); }
+        try { await sendNewsMail(dateStr, r.abstract, r.articles); } catch(e) { console.error('[Cron] 微信推送失败:', e.message); }
       }
     }, 30 * 60 * 1000);
   }
@@ -150,8 +150,8 @@ cron.schedule('0 21 * * *', async () => {
   if (r) {
     const s = r.abstract.replace(/\n/g, ' ').substring(0, 120) + '...';
     const d = `${dateStr.slice(0,4)}-${dateStr.slice(4,6)}-${dateStr.slice(6)}`;
-    await sendPushToAll(`新闻联播 ${d}`, s, `/detail.html?date=${dateStr}`);
-    await sendNewsMail(dateStr, r.abstract, r.articles);
+    try { await sendPushToAll(`新闻联播 ${d}`, s, `/detail.html?date=${dateStr}`); } catch(e) { console.error('[Cron] Web Push 失败:', e.message); }
+    try { await sendNewsMail(dateStr, r.abstract, r.articles); } catch(e) { console.error('[Cron] 微信推送失败:', e.message); }
   }
 }, { timezone: 'Asia/Shanghai' });
 
