@@ -1,17 +1,14 @@
-// 使用 Resend HTTP API 发邮件（避免云平台封锁 SMTP 端口）
-// 注册: https://resend.com  免费 100封/天
-
-function checkConfig() {
-  const { RESEND_API_KEY, MAIL_TO } = process.env;
-  if (!RESEND_API_KEY || !MAIL_TO) {
-    console.log('[Mail] 未配置 RESEND_API_KEY 或 MAIL_TO，跳过邮件');
-    return false;
-  }
-  return true;
-}
+// 使用 PushPlus 微信推送（HTTP API，无端口限制）
+// 官网: https://www.pushplus.plus
+// 支持多人推送: PUSHPLUS_TOKEN=token1,token2,token3
 
 export async function sendNewsMail(dateStr, abstract, articles) {
-  if (!checkConfig()) return;
+  const tokens = (process.env.PUSHPLUS_TOKEN || '').split(',').map(t => t.trim()).filter(Boolean);
+  if (!tokens.length) {
+    console.log('[PushPlus] 未配置 PUSHPLUS_TOKEN，跳过微信推送');
+    return;
+  }
+
   const d = `${dateStr.slice(0,4)}-${dateStr.slice(4,6)}-${dateStr.slice(6)}`;
 
   const articleList = articles.map((a, i) =>
@@ -39,27 +36,30 @@ export async function sendNewsMail(dateStr, abstract, articles) {
   </div>
 </div>`;
 
-  const subject = `📺 新闻联播 ${d} (${articles.length}条)`;
-  const mailTo = process.env.MAIL_TO;
-  console.log(`[Mail] 正在通过 Resend API 发送至 ${mailTo}...`);
+  const title = `📺 新闻联播 ${d} (${articles.length}条)`;
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: process.env.MAIL_FROM || 'onboarding@resend.dev',
-      to: mailTo,
-      subject,
-      html,
-    }),
-  });
-
-  const result = await res.json();
-  if (!res.ok) {
-    throw new Error(`Resend API 错误: ${result.message || JSON.stringify(result)}`);
+  for (const token of tokens) {
+    try {
+      console.log(`[PushPlus] 正在推送至 token: ${token.slice(0, 8)}...`);
+      const res = await fetch('https://www.pushplus.plus/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          title,
+          content: html,
+          template: 'html',
+        }),
+      });
+      const result = await res.json();
+      if (result.code === 200) {
+        console.log(`[PushPlus] ✅ 推送成功 (${token.slice(0, 8)}...)`);
+      } else {
+        throw new Error(result.msg);
+      }
+    } catch (e) {
+      console.error(`[PushPlus] ❌ 推送失败 (${token.slice(0, 8)}...): ${e.message}`);
+      throw e;
+    }
   }
-  console.log(`[Mail] ✅ 邮件已发送至 ${mailTo}, id: ${result.id}`);
 }
