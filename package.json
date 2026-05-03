@@ -1,0 +1,22 @@
+{
+  "name": "xinwen-app",
+  "version": "1.0.0",
+  "description": "新闻联播 PWA - 自建爬虫 + 手机定时推送",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "crawl": "node -e \"import('./crawler.js').then(m => m.crawlToday())\"",
+    "generate-vapid": "npx web-push generate-vapid-keys --json"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.0",
+    "express": "^4.18.0",
+    "jsdom": "^22.0.0",
+    "marked": "^9.0.0",
+    "node-cron": "^3.0.0",
+    "node-fetch": "^3.3.0",
+    "nodemailer": "^6.9.0",
+    "web-push": "^3.6.0"
+  }
+}

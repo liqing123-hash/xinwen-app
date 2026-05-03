@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#c62828">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>新闻联播</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📺</text></svg>">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>📺 新闻联播</h1>
+    <p class="subtitle">每日文字稿 · 定时推送</p>
+  </header>
+  <main>
+    <div class="toolbar">
+      <button id="btn-subscribe" class="btn btn-primary">开启推送通知</button>
+      <button id="btn-crawl" class="btn btn-secondary">抓取今日新闻</button>
+    </div>
+    <div id="status" class="status-bar" style="display:none"></div>
+    <div id="news-list" class="news-list">
+      <div class="loading">加载中...</div>
+    </div>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

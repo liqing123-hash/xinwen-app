@@ -1,0 +1,122 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #c62828;
+  --primary-dark: #8e0000;
+  --bg: #f5f5f5;
+  --card: #fff;
+  --text: #212121;
+  --text2: #666;
+  --border: #e0e0e0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Noto Sans SC', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* ===== Header ===== */
+.app-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  padding: max(env(safe-area-inset-top, 16px), 16px) 16px 14px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(198,40,40,0.3);
+}
+.app-header h1 { font-size: 20px; font-weight: 700; }
+.app-header .subtitle { font-size: 12px; opacity: .8; margin-top: 2px; }
+.back-btn {
+  color: #fff; text-decoration: none; font-size: 14px;
+  display: inline-block; margin-bottom: 6px; opacity: .9;
+}
+.back-btn:active { opacity: .6; }
+
+/* ===== Toolbar ===== */
+.toolbar { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; }
+.btn {
+  flex-shrink: 0; padding: 8px 16px; border: none; border-radius: 20px;
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s;
+  font-family: inherit; -webkit-tap-highlight-color: transparent;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:active { background: var(--primary-dark); }
+.btn-secondary { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.btn-secondary:active { background: #fce4ec; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ===== Status ===== */
+.status-bar {
+  padding: 8px 16px; font-size: 13px; text-align: center;
+  background: #fff3e0; color: #e65100; transition: all .3s;
+}
+.status-bar.success { background: #e8f5e9; color: #2e7d32; }
+.status-bar.error { background: #fce4ec; color: #c62828; }
+
+/* ===== News List ===== */
+.news-list { padding: 8px 16px 24px; }
+.news-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+  cursor: pointer; transition: transform .12s, box-shadow .12s;
+  text-decoration: none; display: block; color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.news-card:active { transform: scale(.98); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+.news-card .date {
+  font-size: 13px; color: var(--primary); font-weight: 700;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+.news-card .date::before {
+  content: ''; width: 4px; height: 16px; background: var(--primary);
+  border-radius: 2px; display: inline-block;
+}
+.news-card .count {
+  font-size: 11px; color: #fff; background: var(--primary);
+  padding: 2px 8px; border-radius: 10px; margin-left: auto;
+}
+.news-card .abstract {
+  font-size: 14px; line-height: 1.7; color: var(--text2);
+  display: -webkit-box; -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ===== Detail ===== */
+.news-detail { padding: 16px; }
+.detail-abstract {
+  background: linear-gradient(135deg, #fff8e1, #fff3e0);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 16px;
+  font-size: 14px; line-height: 1.8; border-left: 4px solid #ffa000;
+}
+.detail-abstract h2 { font-size: 16px; margin-bottom: 10px; color: var(--primary); }
+.article-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+}
+.article-card h3 {
+  font-size: 15px; font-weight: 600; margin-bottom: 10px;
+  color: var(--text); line-height: 1.5;
+}
+.article-card .content { font-size: 14px; line-height: 1.8; color: var(--text2); }
+.article-card .content p { margin-bottom: 8px; }
+.article-card .source-link {
+  display: inline-block; margin-top: 10px; font-size: 13px;
+  color: var(--primary); text-decoration: none;
+}
+.article-card .source-link:active { opacity: .6; }
+
+/* ===== States ===== */
+.loading { text-align: center; padding: 40px; color: var(--text2); font-size: 14px; }
+.empty { text-align: center; padding: 60px 20px; color: var(--text2); }
+.empty .icon { font-size: 48px; margin-bottom: 12px; }
+.empty .msg { font-size: 15px; }
+.empty .hint { font-size: 13px; margin-top: 8px; opacity: .7; }
+
+/* ===== Responsive ===== */
+@media (min-width: 600px) {
+  .news-list, .news-detail, .toolbar { max-width: 600px; margin: 0 auto; }
+}
