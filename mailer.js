@@ -1,31 +1,17 @@
-import nodemailer from 'nodemailer';
+// 使用 Resend HTTP API 发邮件（避免云平台封锁 SMTP 端口）
+// 注册: https://resend.com  免费 100封/天
 
-let transporter = null;
-
-function init() {
-  if (transporter) return true;
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, MAIL_TO } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !MAIL_TO) {
-    console.log('[Mail] 邮箱未配置，跳过邮件发送');
+function checkConfig() {
+  const { RESEND_API_KEY, MAIL_TO } = process.env;
+  if (!RESEND_API_KEY || !MAIL_TO) {
+    console.log('[Mail] 未配置 RESEND_API_KEY 或 MAIL_TO，跳过邮件');
     return false;
   }
-  const port = Number(SMTP_PORT) || 587;
-  transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port,
-    secure: false,
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
-    tls: { rejectUnauthorized: false },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-  });
-  console.log('[Mail] 邮件服务已配置');
   return true;
 }
 
 export async function sendNewsMail(dateStr, abstract, articles) {
-  if (!init()) return;
+  if (!checkConfig()) return;
   const d = `${dateStr.slice(0,4)}-${dateStr.slice(4,6)}-${dateStr.slice(6)}`;
 
   const articleList = articles.map((a, i) =>
@@ -53,12 +39,27 @@ export async function sendNewsMail(dateStr, abstract, articles) {
   </div>
 </div>`;
 
-  console.log(`[Mail] 正在发送至 ${process.env.MAIL_TO} (SMTP: ${process.env.SMTP_HOST}:${process.env.SMTP_PORT}, 用户: ${process.env.SMTP_USER})`);
-  await transporter.sendMail({
-    from: `"新闻联播" <${process.env.SMTP_USER}>`,
-    to: process.env.MAIL_TO,
-    subject: `📺 新闻联播 ${d} (${articles.length}条)`,
-    html,
+  const subject = `📺 新闻联播 ${d} (${articles.length}条)`;
+  const mailTo = process.env.MAIL_TO;
+  console.log(`[Mail] 正在通过 Resend API 发送至 ${mailTo}...`);
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.MAIL_FROM || 'onboarding@resend.dev',
+      to: mailTo,
+      subject,
+      html,
+    }),
   });
-  console.log(`[Mail] ✅ 邮件已发送至 ${process.env.MAIL_TO}`);
+
+  const result = await res.json();
+  if (!res.ok) {
+    throw new Error(`Resend API 错误: ${result.message || JSON.stringify(result)}`);
+  }
+  console.log(`[Mail] ✅ 邮件已发送至 ${mailTo}, id: ${result.id}`);
 }
