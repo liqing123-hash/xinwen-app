@@ -38,6 +38,7 @@ export async function sendNewsMail(dateStr, abstract, articles) {
 
   const title = `📺 新闻联播 ${d} (${articles.length}条)`;
 
+  let failCount = 0;
   for (const token of tokens) {
     try {
       console.log(`[PushPlus] 正在推送至 token: ${token.slice(0, 8)}...`);
@@ -55,11 +56,16 @@ export async function sendNewsMail(dateStr, abstract, articles) {
       if (result.code === 200) {
         console.log(`[PushPlus] ✅ 推送成功 (${token.slice(0, 8)}...)`);
       } else {
-        throw new Error(result.msg);
+        console.error(`[PushPlus] ❌ 推送失败 (${token.slice(0, 8)}...): ${result.msg}`);
+        failCount++;
       }
     } catch (e) {
-      console.error(`[PushPlus] ❌ 推送失败 (${token.slice(0, 8)}...): ${e.message}`);
-      throw e;
+      console.error(`[PushPlus] ❌ 请求失败 (${token.slice(0, 8)}...): ${e.message}`);
+      failCount++;
     }
   }
+  if (failCount === tokens.length) {
+    throw new Error(`所有 ${tokens.length} 个推送均失败`);
+  }
+  console.log(`[PushPlus] 推送完成: ${tokens.length - failCount}/${tokens.length} 成功`);
 }
