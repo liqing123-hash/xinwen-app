@@ -116,8 +116,8 @@ async function sendPushToAll(title, body, url) {
   console.log(`[Push] 推送完成, 成功 ${valid.length}/${subs.length}`);
 }
 
-// 每天 20:00 自动抓取 + 推送
-cron.schedule('0 20 * * *', async () => {
+// 每天 22:00 自动抓取 + 推送 (等央视网发布完所有文字稿)
+cron.schedule('0 22 * * *', async () => {
   console.log('[Cron] 开始每日抓取...');
   const dateStr = getDateString();
   const result = await crawlDate(dateStr);
@@ -140,8 +140,8 @@ cron.schedule('0 20 * * *', async () => {
   }
 }, { timezone: 'Asia/Shanghai' });
 
-// 额外: 每天 21:00 重试 (部分新闻发布较晚)
-cron.schedule('0 21 * * *', async () => {
+// 额外: 每天 23:00 重试 (兜底)
+cron.schedule('0 23 * * *', async () => {
   const dateStr = getDateString();
   const p = path.join(NEWS_DIR, `${dateStr}.json`);
   if (fs.existsSync(p)) return;
