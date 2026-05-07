@@ -116,8 +116,8 @@ async function sendPushToAll(title, body, url) {
   console.log(`[Push] 推送完成, 成功 ${valid.length}/${subs.length}`);
 }
 
-// 每天 22:00 自动抓取 + 推送 (等央视网发布完所有文字稿)
-cron.schedule('0 22 * * *', async () => {
+// 每天 20:00 自动抓取 + 推送 (先发一版，内容可能不全)
+cron.schedule('0 20 * * *', async () => {
   console.log('[Cron] 开始每日抓取...');
   const dateStr = getDateString();
   const result = await crawlDate(dateStr);
@@ -140,17 +140,28 @@ cron.schedule('0 22 * * *', async () => {
   }
 }, { timezone: 'Asia/Shanghai' });
 
-// 额外: 每天 23:00 重试 (兜底)
-cron.schedule('0 23 * * *', async () => {
+// 额外: 每天 21:00 智能补全 (检查正文是否完整，不完整则重新抓取+推送)
+cron.schedule('0 21 * * *', async () => {
   const dateStr = getDateString();
   const p = path.join(NEWS_DIR, `${dateStr}.json`);
-  if (fs.existsSync(p)) return;
-  console.log('[Cron] 重试抓取...');
-  const r = await crawlDate(dateStr);
+  if (!fs.existsSync(p)) {
+    console.log('[Cron] 21:00 检查: 数据不存在，需要抓取');
+  } else {
+    const data = JSON.parse(fs.readFileSync(p, 'utf-8'));
+    const emptyCount = data.articles.filter(a => !a.content || a.content.trim() === '').length;
+    if (emptyCount === 0) {
+      console.log('[Cron] 21:00 检查: 内容完整，无需补全');
+      return;
+    }
+    console.log(`[Cron] 21:00 检查: ${emptyCount}/${data.articles.length} 条缺少正文，重新抓取`);
+  }
+  const r = await crawlDate(dateStr, true);
   if (r) {
+    const emptyAfter = r.articles.filter(a => !a.content || a.content.trim() === '').length;
+    console.log(`[Cron] 补全完成: ${r.articles.length - emptyAfter}/${r.articles.length} 条有正文`);
     const s = r.abstract.replace(/\n/g, ' ').substring(0, 120) + '...';
     const d = `${dateStr.slice(0,4)}-${dateStr.slice(4,6)}-${dateStr.slice(6)}`;
-    try { await sendPushToAll(`新闻联播 ${d}`, s, `/detail.html?date=${dateStr}`); } catch(e) { console.error('[Cron] Web Push 失败:', e.message); }
+    try { await sendPushToAll(`新闻联播 ${d}（完整版）`, s, `/detail.html?date=${dateStr}`); } catch(e) { console.error('[Cron] Web Push 失败:', e.message); }
     try { await sendNewsMail(dateStr, r.abstract, r.articles); } catch(e) { console.error('[Cron] 微信推送失败:', e.message); }
   }
 }, { timezone: 'Asia/Shanghai' });
